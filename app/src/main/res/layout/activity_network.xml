@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/et_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="URL" />
+
+        <Button
+            android:id="@+id/btn_broken_tls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fetch with broken TrustManager / HostnameVerifier" />
+
+        <Button
+            android:id="@+id/btn_normal_https"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fetch with default URLConnection (uses NSC)" />
+
+        <TextView
+            android:id="@+id/tv_output"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textIsSelectable="true"
+            android:fontFamily="monospace"
+            android:paddingTop="16dp" />
+    </LinearLayout>
+</ScrollView>

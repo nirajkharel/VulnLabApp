@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  VULN: file-provider-overbroad-root-path (blog: file-provider-overbroad-root-path.md)
+
+  The <root-path> element with path="/" exposes the entire filesystem to the
+  FileProvider. FileProvider.getUriForFile() will accept any absolute path and
+  return a valid content:// URI that any receiver with
+  FLAG_GRANT_READ_URI_PERMISSION can open.
+
+  The developer's intent: share files from getExternalFilesDir("exports").
+  The reality: the FileProvider can generate shareable URIs for:
+    /data/data/com.vulnlab.app/databases/vulnlab.db
+    /data/data/com.vulnlab.app/shared_prefs/auth_prefs.xml
+    /proc/self/maps
+    /system/build.prop
+
+  The fix: replace <root-path> with the narrowest matching path element:
+    <files-path name="exports" path="exports/" />
+-->
+<paths>
+    <!-- VULN: root-path with path="/" — entire filesystem accessible -->
+    <root-path name="root" path="/" />
+
+    <!-- Also over-broad: exposes entire files dir -->
+    <files-path name="files" path="." />
+
+    <!-- Also over-broad: exposes entire external storage -->
+    <external-path name="external" path="." />
+</paths>

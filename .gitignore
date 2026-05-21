@@ -1,0 +1,30 @@
+# Local config (contains absolute SDK / JDK paths)
+local.properties
+
+# Gradle build state and outputs
+.gradle/
+build/
+out/
+captures/
+*.apk
+*.aab
+
+# Android Studio / IntelliJ user state
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Keystore files (signing keys must never be committed)
+*.jks
+*.keystore
+keystore.properties
+
+# Native build outputs
+*.so
+*.o
+.cxx/
+
+# OS noise
+.DS_Store
+Thumbs.db

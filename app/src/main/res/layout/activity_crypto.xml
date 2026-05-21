@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/et_plaintext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Plaintext"
+            android:text="hello vulnlab" />
+
+        <EditText
+            android:id="@+id/et_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password (for pwd-as-key demo)"
+            android:text="hunter2" />
+
+        <Button
+            android:id="@+id/btn_ecb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Encrypt — AES/ECB" />
+
+        <Button
+            android:id="@+id/btn_cbc_fixed_iv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Encrypt — AES/CBC fixed IV" />
+
+        <Button
+            android:id="@+id/btn_password_key"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Encrypt — Password as key" />
+
+        <TextView
+            android:id="@+id/tv_output"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textIsSelectable="true"
+            android:fontFamily="monospace"
+            android:paddingTop="16dp" />
+    </LinearLayout>
+</ScrollView>

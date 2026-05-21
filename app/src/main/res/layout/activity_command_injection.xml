@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/et_cmd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Command"
+            android:text="id" />
+
+        <Button
+            android:id="@+id/btn_exec_string"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Runtime.exec(String)" />
+
+        <Button
+            android:id="@+id/btn_exec_shell"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="exec(sh -c &lt;input&gt;)" />
+
+        <Button
+            android:id="@+id/btn_process_builder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ProcessBuilder ping" />
+
+        <TextView
+            android:id="@+id/tv_output"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textIsSelectable="true"
+            android:fontFamily="monospace"
+            android:paddingTop="16dp" />
+    </LinearLayout>
+</ScrollView>
