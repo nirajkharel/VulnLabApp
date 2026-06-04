@@ -1,11 +1,19 @@
 package com.vulnlab.app;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.vulnlab.app.activities.*;
 
@@ -46,10 +54,19 @@ public class MainActivity extends AppCompatActivity {
         { "Weak Custom Permission",                "WeakPermissionActivity" },
     };
 
+    private static final int PERMS_REQUEST_CODE = 0xC0DE;
+
+    private static final String[] RUNTIME_PERMS = {
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        requestRuntimePermissions();
 
         String[] labels = new String[DEMOS.length];
         for (int i = 0; i < DEMOS.length; i++) labels[i] = DEMOS[i][0];
@@ -67,5 +84,30 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         });
+    }
+
+    private void requestRuntimePermissions() {
+        List<String> missing = new ArrayList<>();
+        for (String p : RUNTIME_PERMS) {
+            if (ContextCompat.checkSelfPermission(this, p)
+                    != PackageManager.PERMISSION_GRANTED) {
+                missing.add(p);
+            }
+        }
+        if (!missing.isEmpty()) {
+            ActivityCompat.requestPermissions(
+                this,
+                missing.toArray(new String[0]),
+                PERMS_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // VulnLabApp does not branch on the result. A real app would handle
+        // the denied case here (e.g. disable a feature, show rationale).
     }
 }

@@ -1,7 +1,9 @@
 package com.vulnlab.app.activities;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.CookieManager;
@@ -13,6 +15,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.vulnlab.app.R;
 
@@ -32,7 +36,19 @@ public class WebViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_webview);
 
+        // Request storage permission if not already granted. Needed for
+        // file:// loads from /sdcard to succeed.
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE,
+                              Manifest.permission.WRITE_EXTERNAL_STORAGE },
+                0xC0DE);
+        }
+
         webView = findViewById(R.id.webview);
+        WebView.setWebContentsDebuggingEnabled(true);
         WebSettings settings = webView.getSettings();
 
         // VULN: JavaScript enabled

@@ -8,9 +8,13 @@ android {
 
     defaultConfig {
         applicationId "com.vulnlab.app"
-        // VULN: janus-v1-signing — low minSdkVersion enables the Janus attack window
         minSdk 21
-        targetSdk 34
+        // targetSdk 28 keeps the app in legacy external-storage mode so the
+        // file:// exfil chain reproduces on Android 11+ devices without
+        // MANAGE_EXTERNAL_STORAGE plumbing. Also disables the API 31+
+        // "exported must be explicit" enforcement and the API 33+
+        // granular media permissions.
+        targetSdk 28
         versionCode 1
         versionName "1.0"
     }
