@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VulnLabApp Dashboard</title>
+  <style>
+    body { font-family: -apple-system, Roboto, sans-serif; margin: 24px; color: #222; }
+    h1 { font-size: 20px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-top: 16px; }
+    code { background: #f3f3f3; padding: 2px 4px; border-radius: 4px; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <h1>Dashboard</h1>
+  <div class="card">
+    <p>Signed in. Session token is carried in the URL fragment.</p>
+    <p><strong>location.hash:</strong> <code id="hash"></code></p>
+  </div>
+  <script>
+    // VULN: jwt-token-fragment-leak — token readable from window.location
+    document.getElementById('hash').textContent = window.location.hash;
+  </script>
+</body>
+</html>

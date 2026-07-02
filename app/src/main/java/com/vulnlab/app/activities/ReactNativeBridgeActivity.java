@@ -65,9 +65,10 @@ public class ReactNativeBridgeActivity extends AppCompatActivity {
         });
     }
 
-    // Simulated @ReactMethod implementations
+    // VULN: public matches real @ReactMethod contract — also ensures ART doesn't inline
+    // these into lambda call sites, which would bypass Frida method hooks.
 
-    private String nativeExec(String cmd) {
+    public String nativeExec(String cmd) {
         try {
             Process p = Runtime.getRuntime().exec(new String[]{"sh", "-c", cmd});
             BufferedReader br = new BufferedReader(
@@ -81,7 +82,7 @@ public class ReactNativeBridgeActivity extends AppCompatActivity {
         }
     }
 
-    private String nativeGetStoredToken() {
+    public String nativeGetStoredToken() {
         // VULN: returns plaintext token from SharedPreferences to JS bridge
         return getSharedPreferences("auth_prefs", MODE_PRIVATE)
             .getString("session_token", "no-token");

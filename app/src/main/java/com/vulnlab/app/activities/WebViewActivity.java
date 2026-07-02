@@ -69,9 +69,11 @@ public class WebViewActivity extends AppCompatActivity {
 
         webView.setWebViewClient(new WebViewClient());
 
-        // VULN: jwt-token-fragment-leak — token appended to URL fragment
+        // VULN: jwt-token-fragment-leak — token appended to URL fragment.
+        // Loads a bundled asset so the page renders offline (and JS can read
+        // window.location.hash); the token still leaks via the fragment.
         String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIzIn0.SIG";
-        String baseUrl = "https://app.vulnlabapp.example.com/dashboard";
+        String baseUrl = "file:///android_asset/dashboard.html";
         String urlWithFragment = baseUrl + "#access_token=" + token;
 
         // Prefer URL from intent extra — VULN: no scheme validation

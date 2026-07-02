@@ -17,7 +17,7 @@ public class JanusInfoActivity extends AppCompatActivity {
         tv.setText(
             "Janus / v1-only Signing (CVE-2017-13156)\n\n"
             + "This app is built with:\n"
-            + "  minSdkVersion = 16\n"
+            + "  minSdkVersion = 21\n"
             + "  v1SigningEnabled = true\n"
             + "  v2SigningEnabled = false\n\n"
             + "Exploit:\n"

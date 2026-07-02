@@ -27,7 +27,13 @@ public class FileProviderActivity extends AppCompatActivity {
         EditText etPath = findViewById(R.id.et_share_path);
         TextView tvOutput = findViewById(R.id.tv_output);
 
-        etPath.setText("/data/data/com.vulnlab.app/shared_prefs/auth_prefs.xml");
+        // VULN: attacker can inject file_path via intent extra — no validation
+        Intent intent = getIntent();
+        if (intent.hasExtra("file_path")) {
+            etPath.setText(intent.getStringExtra("file_path"));
+        } else {
+            etPath.setText("/data/data/com.vulnlab.app/shared_prefs/auth_prefs.xml");
+        }
 
         findViewById(R.id.btn_share).setOnClickListener(v -> {
             String path = etPath.getText().toString();

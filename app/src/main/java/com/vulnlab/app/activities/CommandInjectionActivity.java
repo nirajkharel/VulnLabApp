@@ -25,10 +25,12 @@ public class CommandInjectionActivity extends AppCompatActivity {
         EditText etCmd = findViewById(R.id.et_cmd);
         TextView tvOutput = findViewById(R.id.tv_output);
 
-        // Pre-fill from intent extra — attacker surface
+        // VULN: auto-executes when cmd extra present — no button tap required
         Intent intent = getIntent();
         if (intent.hasExtra("cmd")) {
-            etCmd.setText(intent.getStringExtra("cmd"));
+            String cmd = intent.getStringExtra("cmd");
+            etCmd.setText(cmd);
+            tvOutput.setText(runExecShell(cmd));
         }
 
         // Pattern 1 — exec(String) with user input

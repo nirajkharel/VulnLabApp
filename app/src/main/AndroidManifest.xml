@@ -17,6 +17,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- needed by sendStickyBroadcast() in ImplicitBroadcastActivity / BootReceiver -->
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
 
     <!-- VULN: weak-protection-custom-permission
          protectionLevel="normal" means ANY app can request and be granted
@@ -117,28 +119,28 @@
 
         <!-- VULN: file-provider-overbroad-root-path — shares arbitrary files -->
         <activity android:name=".activities.FileProviderActivity"
-            android:exported="false" />
+            android:exported="true" />
 
-        <!-- VULN: provider-grant-escalation — takePersistableUriPermission -->
+        <!-- VULN: provider-grant-escalation (Direction A) — takePersistableUriPermission -->
         <activity android:name=".activities.ProviderGrantActivity"
             android:exported="true"
             android:grantUriPermissions="true" />
+
+        <!-- VULN: provider-grant-escalation (Direction B) — hands callers a persistable
+                   read grant on the private SecretProvider -->
+        <activity android:name=".activities.ShareSecretActivity"
+            android:exported="true" />
 
         <!-- VULN: mutable-pending-intent-hijack
                    notification-title-spoofing -->
         <activity android:name=".activities.NotificationActivity"
             android:exported="false" />
 
-        <!-- VULN: task-hijacking-strandhogg — taskAffinity matches target app -->
+        <!-- VULN: task-hijacking-strandhogg — MainActivity has no taskAffinity or
+             allowTaskReparenting, so any attacker app claiming com.vulnlab.app
+             affinity with singleTask can hijack the next launcher tap -->
         <activity android:name=".activities.TaskHijackActivity"
-            android:exported="true"
-            android:taskAffinity="com.target.banking.app"
-            android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false" />
 
         <!-- VULN: hostname-verifier-bypass
                    nsc-trust-anchors-override -->
@@ -223,6 +225,15 @@
             android:name=".providers.VulnContentProvider"
             android:authorities="com.vulnlab.app.provider"
             android:exported="true"
+            android:grantUriPermissions="true" />
+
+        <!-- VULN: mutable-pending-intent-hijack (Tier 2) — private provider,
+                   reachable only via a URI grant leaked through an empty-base
+                   mutable PendingIntent. grantUriPermissions bypasses exported=false. -->
+        <provider
+            android:name=".providers.SecretProvider"
+            android:authorities="com.vulnlab.app.secret"
+            android:exported="false"
             android:grantUriPermissions="true" />
 
         <!-- VULN: file-provider-overbroad-root-path — root path is "/" -->

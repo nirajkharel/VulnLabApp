@@ -33,22 +33,55 @@ public class NotificationActivity extends AppCompatActivity {
 
         createChannel();
 
-        // VULN: notification-title-spoofing — pre-fill from intent extras
+        // VULN: notification-title-spoofing — extras fire notification directly, no button click needed
         Intent intent = getIntent();
-        if (intent.hasExtra("title")) etTitle.setText(intent.getStringExtra("title"));
-        if (intent.hasExtra("body"))  etBody.setText(intent.getStringExtra("body"));
+        if (intent.hasExtra("title") && intent.hasExtra("body")) {
+            String t = intent.getStringExtra("title");
+            String b = intent.getStringExtra("body");
+            etTitle.setText(t);
+            etBody.setText(b);
+            Log.d(TAG, "[notif-spoof] title=" + t + " body=" + b);
+            Notification auto = new NotificationCompat.Builder(this, CHANNEL)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle(t)
+                .setContentText(b)
+                .build();
+            getSystemService(NotificationManager.class).notify(NOTIF_ID + 1, auto);
+        } else {
+            if (intent.hasExtra("title")) etTitle.setText(intent.getStringExtra("title"));
+            if (intent.hasExtra("body"))  etBody.setText(intent.getStringExtra("body"));
+        }
+
+        // VULN: mutable-pending-intent-hijack (Tier 2). Post a notification whose
+        // contentIntent is built from an EMPTY base intent + FLAG_MUTABLE. A holder
+        // (e.g. a NotificationListenerService) can fillIn the action/data/package and
+        // a URI grant flag, steering the fire to their own component and stealing a
+        // grant on our private SecretProvider. Trigger: --ez post_empty_pi true
+        if (intent.getBooleanExtra("post_empty_pi", false)) {
+            PendingIntent leak = PendingIntent.getActivity(
+                this, 2, new Intent(),   // VULN: empty base — attacker fills it all in
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+
+            Notification n = new NotificationCompat.Builder(this, CHANNEL)
+                .setSmallIcon(android.R.drawable.ic_dialog_alert)
+                .setContentTitle("VulnLabApp: Sync required")
+                .setContentText("Tap to sync your account.")
+                .setContentIntent(leak)
+                .build();
+            getSystemService(NotificationManager.class).notify(NOTIF_ID + 2, n);
+            tvOutput.setText("Empty-base mutable PendingIntent posted (Tier 2). "
+                + "A holder can redirect it and steal a grant on com.vulnlab.app.secret.");
+        }
 
         // Button 1: mutable PendingIntent notification
         findViewById(R.id.btn_mutable_pi).setOnClickListener(v -> {
             Intent targetIntent = new Intent(this, FileWriteActivity.class);
             targetIntent.putExtra("_original_extra", "safe_value");
 
-            // VULN: FLAG_MUTABLE — receiver can modify extras before firing
+            // VULN: FLAG_MUTABLE — receiver can modify extras before firing.
+            // Set explicitly on every API so the flag is honest to tooling
+            // (pre-31 is mutable-by-default; bit 0x02000000 is a no-op there).
             int piFlags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE;
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                // On pre-31, FLAG_MUTABLE is default
-                piFlags = PendingIntent.FLAG_UPDATE_CURRENT;
-            }
             PendingIntent pi = PendingIntent.getActivity(this, 1, targetIntent, piFlags);
             Log.d(TAG, "[mutable-PI] created mutable PendingIntent for FileWriteActivity");
 

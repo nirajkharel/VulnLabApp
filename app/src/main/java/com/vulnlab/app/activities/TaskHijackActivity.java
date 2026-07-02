@@ -15,13 +15,16 @@ public class TaskHijackActivity extends AppCompatActivity {
 
         TextView tvInfo = findViewById(R.id.tv_task_hijack_info);
         tvInfo.setText(
-            "Task Hijack (StrandHogg)\n\n"
-            + "This activity's taskAffinity is set to:\n"
-            + "  com.target.banking.app\n\n"
-            + "launchMode: singleTask\n\n"
-            + "When a user opens the banking app after this activity has run, "
-            + "Android routes them here instead.\n\n"
-            + "In a real attack this screen would mimic the banking app's login UI."
+            "Task Hijacking (StrandHogg)\n\n"
+            + "Vulnerability: MainActivity declares no taskAffinity.\n"
+            + "Android assigns the default: com.vulnlab.app\n\n"
+            + "Any attacker app that sets:\n"
+            + "  taskAffinity=\"com.vulnlab.app\"\n"
+            + "  launchMode=\"singleTask\"\n\n"
+            + "can plant itself in this app's task.\n"
+            + "On Android <= 10 the next launcher tap routes to the\n"
+            + "attacker's screen instead of this app.\n\n"
+            + "Fix: android:taskAffinity=\"\" on MainActivity"
         );
     }
 }

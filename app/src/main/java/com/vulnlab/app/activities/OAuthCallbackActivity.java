@@ -9,6 +9,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.vulnlab.app.R;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+
 public class OAuthCallbackActivity extends AppCompatActivity {
 
     private static final String TAG = "VulnOAuth";
@@ -20,6 +24,32 @@ public class OAuthCallbackActivity extends AppCompatActivity {
 
         TextView tvOutput = findViewById(R.id.tv_output);
         Intent intent = getIntent();
+
+        // VULN: parcelable-redirection escalation — if callback_url is injected via
+        // IntentRedirectorActivity's next_intent chain, POST the stored session token
+        // to the attacker's server. "data" is the fallback key from the pending_action chain.
+        String callbackUrl = intent.getStringExtra("callback_url");
+        if (callbackUrl == null) callbackUrl = intent.getStringExtra("data");
+        if (callbackUrl != null) {
+            final String token = getSharedPreferences("auth_prefs", MODE_PRIVATE)
+                .getString("session_token", "no-token");
+            Log.d(TAG, "[oauth-callback-leak] POSTing token to: " + callbackUrl);
+            tvOutput.setText("[oauth-callback-leak] Posting token to: " + callbackUrl);
+            final String finalUrl = callbackUrl;
+            new Thread(() -> {
+                try {
+                    HttpURLConnection conn = (HttpURLConnection) new URL(finalUrl).openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setDoOutput(true);
+                    byte[] body = ("token=" + URLEncoder.encode(token, "UTF-8")).getBytes("UTF-8");
+                    conn.getOutputStream().write(body);
+                    conn.getResponseCode();
+                    conn.disconnect();
+                } catch (Exception ignored) {}
+            }).start();
+            return;
+        }
+
         Uri data = intent.getData();
 
         if (data == null) {
@@ -62,5 +92,11 @@ public class OAuthCallbackActivity extends AppCompatActivity {
         startActivity(webIntent);
 
         tvOutput.setText("OAuth code: " + code + "\nToken: " + accessToken);
+    }
+
+    // VULN: public method callable via Class.forName reflection (ReflectionActivity demo)
+    public String process(String url) {
+        Log.d(TAG, "[oauth-process] callback_url=" + url);
+        return "callback_processed: " + url;
     }
 }
